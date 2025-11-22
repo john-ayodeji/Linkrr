@@ -41,14 +41,10 @@ func (a *apiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := a.db.GetUser(r.Context(), database.GetUserParams{
+	u, _ := a.db.GetUser(r.Context(), database.GetUserParams{
 		Email: user_cred.Email,
 		Username: user_cred.UserName,
 	})
-	if err != nil {
-		go utils.LogError(err.Error())
-		return
-	}
 	if u.ID != uuid.Nil {
 		utils.SendError(w, "User already exists", http.StatusUnauthorized)
 		return
@@ -95,6 +91,10 @@ func (a *apiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		AccessToken: jwt,
 		RefreshToken: refresh_token,
 	}
+	
+	go func(name, email string) {
+		SendWelcomeEmail(name, email)
+	}(resp.UserName, resp.Email)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(201)
