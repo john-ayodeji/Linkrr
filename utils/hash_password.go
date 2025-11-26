@@ -13,3 +13,13 @@ func HashPassword(password string) (string, error) {
 
 	return hashedPassword, nil
 }
+
+func ComparePasswords(password, hash string) (bool, error) {
+	ok, err := argon2id.ComparePasswordAndHash(password, hash); 
+	if err != nil {
+		go LogError(err.Error())
+		return false, err
+	}
+
+	return ok, nil
+}

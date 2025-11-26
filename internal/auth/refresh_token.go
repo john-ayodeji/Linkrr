@@ -4,7 +4,7 @@ import (
 	"crypto/rand"
 )
 
-func MakeRefreshToken() (string) {
+func MakeRefreshToken() string {
 	token := rand.Text()
 	return token
 }
