@@ -109,6 +109,18 @@ func SendPasswordResetEmail(name, email, url string) {
 		Name: name,
 		URL:  url,
 	}
-	html := utils.RenderTemplate("./email_templates/password_email.html", data)
+	html := utils.RenderTemplate("./email_templates/password_reset.html", data)
+	sendEmail("Password-Reset", subject, text, html, name, email)
+}
+
+func SendPasswordChangedEmail(name, email string) {
+	subject := fmt.Sprintf("Password Change Successful")
+	text := fmt.Sprintf("Hello %v\n your password has been changed successfully\nIf this action wasn't carried out by you, reset your password now.", name)
+	data := struct {
+		Name string
+	}{
+		Name: name,
+	}
+	html := utils.RenderTemplate("./email_templates/password_changed.html", data)
 	sendEmail("Password-Reset", subject, text, html, name, email)
 }

@@ -16,6 +16,7 @@ type apiConfig struct {
 	port      int
 	db        *database.Queries
 	jwtSecret string
+	baseUrl   string
 }
 
 func main() {
@@ -44,6 +45,7 @@ func main() {
 	cfg.db = database.New(db)
 	cfg.jwtSecret = jwtSecret
 	cfg.port = 3000
+	cfg.baseUrl = "localhost:3000"
 
 	cfg.RegisterAuthRoutes(mux)
 

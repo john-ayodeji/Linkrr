@@ -9,4 +9,6 @@ func (a *apiConfig) RegisterAuthRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /api/v1/auth/login", a.Login)
 	mux.HandleFunc("GET /api/v1/auth/refresh", a.RenewAccessToken)
 	mux.HandleFunc("GET /api/v1/auth/revoke", a.RevokeRefreshToken)
+	mux.HandleFunc("POST /api/v1/auth/forgot-password", a.ForgotPassword)
+	mux.HandleFunc("POST /api/v1/auth/reset-password", a.ResetPassword)
 }

@@ -11,6 +11,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type PasswordReset struct {
+	ID          uuid.UUID
+	UserID      uuid.UUID
+	HashedToken string
+	CreatedAt   time.Time
+	ExpiresAt   time.Time
+	Used        bool
+}
+
 type RefreshToken struct {
 	Token     string
 	UserID    uuid.UUID
