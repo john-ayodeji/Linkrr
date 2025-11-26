@@ -20,11 +20,12 @@ type mailtrapPayload struct {
 	From     mailtrapEmail   `json:"from"`
 	To       []mailtrapEmail `json:"to"`
 	Subject  string          `json:"subject"`
-	Text     string          `json:"text"`
-	Category string          `json:"category"`
+	Text     string
+	HTML     string
+	Category string `json:"category"`
 }
 
-func sendEmail(category, subject, text, name, email string) {
+func sendEmail(category, subject, text, html, name, email string) {
 	token := os.Getenv("MAILTRAP_TOKEN")
 	if token == "" {
 		utils.LogError("MAILTRAP_TOKEN not set")
@@ -36,6 +37,7 @@ func sendEmail(category, subject, text, name, email string) {
 		To:       []mailtrapEmail{{Email: email, Name: name}},
 		Subject:  subject,
 		Text:     text,
+		HTML:     html,
 		Category: category,
 	}
 
@@ -72,11 +74,41 @@ func sendEmail(category, subject, text, name, email string) {
 func SendWelcomeEmail(name, email string) {
 	subject := fmt.Sprintf("Welcome to Linkrr, %s!", name)
 	text := fmt.Sprintf("Hi %s, welcome to Linkrr! We're excited to have you aboard.", name)
-	sendEmail("Signup", subject, text, name, email)
+	data := struct {
+		Name     string
+		LoginURL string
+	}{
+		Name:     name,
+		LoginURL: "localhost:3000/api/v1/auth/login",
+	}
+	html := utils.RenderTemplate("./email_templates/signup_email.html", data)
+	sendEmail("Signup", subject, text, html, name, email)
 }
 
 func SendLoginWelcomeEmail(name, email string) {
 	subject := fmt.Sprintf("Welcome back, %s!", name)
 	text := fmt.Sprintf("Hi %s, great to see you again on Linkrr.", name)
-	sendEmail("Login", subject, text, name, email)
+	data := struct {
+		Name     string
+		LoginURL string
+	}{
+		Name:     name,
+		LoginURL: "localhost:3000/api/v1/auth/login",
+	}
+	html := utils.RenderTemplate("./email_templates/login_email.html", data)
+	sendEmail("Login", subject, text, html, name, email)
+}
+
+func SendPasswordResetEmail(name, email, url string) {
+	subject := fmt.Sprintf("Password Reset Request")
+	text := fmt.Sprintf("Hello %v\n We received a request to reset your password.\nClick the link below to set a new password\n%v\nThis link will expire in 15 minutes.\n\n\nIf you did not request this, you can safely ignore this email\nThanks, The Linkrr Team", name, url)
+	data := struct {
+		Name string
+		URL  string
+	}{
+		Name: name,
+		URL:  url,
+	}
+	html := utils.RenderTemplate("./email_templates/password_email.html", data)
+	sendEmail("Password-Reset", subject, text, html, name, email)
 }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; margin:0; padding:0;">
+<div style="max-width:600px; margin:auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+    <div style="background-color:#2196F3; padding:30px; text-align:center; color:#fff;">
+        <h1>Welcome back, {{.Name}}!</h1>
+    </div>
+    <div style="padding:30px; color:#333;">
+        <p>Hi {{.Name}},</p>
+        <p>It's great to see you again! Check out what's new:</p>
+        <ul style="line-height:1.6;">
+            <li>New dashboard insights</li>
+            <li>Updated analytics on your links</li>
+            <li>Smarter link management features</li>
+        </ul>
+        <p>Click below to continue where you left off:</p>
+        <p style="text-align:center;">
+            <a href="{{.LoginURL}}" style="display:inline-block; padding:12px 25px; background-color:#2196F3; color:#fff; text-decoration:none; border-radius:5px;">Continue to Dashboard</a>
+        </p>
+        <p>Thanks,<br>The Linkrr Team</p>
+    </div>
+    <div style="background:#f9f9f9; text-align:center; padding:15px; font-size:12px; color:#777;">
+        If this wasn't you, please secure your account immediately.
+    </div>
+</div>
+</body>
+</html>
