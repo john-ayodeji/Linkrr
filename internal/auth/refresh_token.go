@@ -7,7 +7,7 @@ import (
 )
 
 func MakeRefreshToken() string {
-	b := make([]byte, 12)
+	b := make([]byte, 30)
 	_, err := rand.Read(b)
 	if err != nil {
 		log.Printf("REFRESH TOKEN ERROR: %s", err)
@@ -15,5 +15,5 @@ func MakeRefreshToken() string {
 
 	token := base64.RawURLEncoding.EncodeToString(b)
 
-	return token[:12]
+	return token[:30]
 }

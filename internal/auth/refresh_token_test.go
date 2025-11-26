@@ -11,7 +11,7 @@ func TestRefreshToken(t *testing.T) {
 
 	passCount := 0
 
-	if len(a) != 12 {
+	if len(a) != 30 {
 		fmt.Println("=============================")
 		fmt.Println("Invalid token length")
 		t.Fail()

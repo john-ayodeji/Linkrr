@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -78,7 +80,17 @@ func (a *apiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		utils.SendError(w, "Something Went Wrong", http.StatusInternalServerError)
 	}
 
-	refresh_token := auth.MakeRefreshToken()
+	refreshToken := auth.MakeRefreshToken()
+	go func() {
+		err := a.db.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{
+			Token:     refreshToken,
+			UserID:    user.ID,
+			ExpiresAt: time.Now().Add((24 * time.Hour) * 30),
+		})
+		if err != nil {
+			log.Printf("ERROR saving refresh token: %v", err)
+		}
+	}()
 
 	resp := UserData{
 		UserID:       user.ID,
@@ -89,7 +101,7 @@ func (a *apiConfig) SignUp(w http.ResponseWriter, r *http.Request) {
 		CreatedAT:    user.CreatedAt,
 		UpdatedAT:    user.UpdatedAt,
 		AccessToken:  jwt,
-		RefreshToken: refresh_token,
+		RefreshToken: refreshToken,
 	}
 
 	go func(name, email string) {
@@ -139,7 +151,17 @@ func (a *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	jwt, _ := auth.MakeJWT(data.ID, a.jwtSecret)
-	refresh_token := auth.MakeRefreshToken()
+	refreshToken := auth.MakeRefreshToken()
+	go func() {
+		err := a.db.CreateRefreshToken(context.Background(), database.CreateRefreshTokenParams{
+			Token:     refreshToken,
+			UserID:    data.ID,
+			ExpiresAt: time.Now().Add((24 * time.Hour) * 30),
+		})
+		if err != nil {
+			log.Printf("ERROR saving refresh token: %v", err)
+		}
+	}()
 
 	resp := UserData{
 		UserID:       data.ID,
@@ -149,7 +171,7 @@ func (a *apiConfig) Login(w http.ResponseWriter, r *http.Request) {
 		Role:         data.Role.String,
 		UpdatedAT:    data.UpdatedAt,
 		AccessToken:  jwt,
-		RefreshToken: refresh_token,
+		RefreshToken: refreshToken,
 	}
 
 	go func(name, email string) {

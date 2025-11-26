@@ -2,19 +2,19 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
-	"fmt"
 
-	"github.com/joho/godotenv"
 	"github.com/john-ayodeji/Linkrr/internal/database"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
-	port int
-	db *database.Queries
+	port      int
+	db        *database.Queries
 	jwtSecret string
 }
 
