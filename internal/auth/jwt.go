@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

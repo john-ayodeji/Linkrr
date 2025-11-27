@@ -7,7 +7,10 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
+	"github.com/john-ayodeji/Linkrr/internal/handlers/auth"
+	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -16,12 +19,10 @@ type apiConfig struct {
 	port      int
 	db        *database.Queries
 	jwtSecret string
-	baseUrl   string
 }
 
 func main() {
 	mux := http.NewServeMux()
-	var cfg apiConfig
 	godotenv.Load()
 
 	dbURL := os.Getenv("DB_URL")
@@ -42,16 +43,20 @@ func main() {
 		log.Fatalf("DB ping failed: %v", err)
 	}
 
-	cfg.db = database.New(db)
-	cfg.jwtSecret = jwtSecret
-	cfg.port = 3000
-	cfg.baseUrl = "localhost:3000"
+	cfg := &config.ApiConfig{
+		Port:      3000,
+		JWTSecret: jwtSecret,
+		Db:        database.New(db),
+	}
 
-	cfg.RegisterAuthRoutes(mux)
+	authHandler.Cfg = cfg
+	authService.Cfg = cfg
 
-	addr := fmt.Sprintf("localhost:%d", cfg.port)
+	RegisterAuthRoutes(mux)
+
+	addr := fmt.Sprintf("localhost:%d", cfg.Port)
 	server := http.Server{Addr: addr, Handler: mux}
-	log.Printf("Server started on port %d", cfg.port)
+	log.Printf("Server started on port %d", cfg.Port)
 	if err := http.ListenAndServe(server.Addr, server.Handler); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
