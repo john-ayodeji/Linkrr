@@ -9,8 +9,9 @@ import (
 
 	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	"github.com/john-ayodeji/Linkrr/internal/handlers/auth"
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
+	"github.com/john-ayodeji/Linkrr/internal/services/redirect"
+	"github.com/john-ayodeji/Linkrr/internal/services/shortener"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -49,10 +50,13 @@ func main() {
 		Db:        database.New(db),
 	}
 
-	authHandler.Cfg = cfg
 	authService.Cfg = cfg
+	shortener.Cfg = cfg
+	redirect.Cfg = cfg
 
 	RegisterAuthRoutes(mux)
+	RegisterShortenerRoutes(mux)
+	RegisterRedirectRoute(mux)
 
 	addr := fmt.Sprintf("localhost:%d", cfg.Port)
 	server := http.Server{Addr: addr, Handler: mux}

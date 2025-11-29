@@ -11,6 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type Alias struct {
+	ID        uuid.UUID
+	Alias     string
+	UrlCode   string
+	CreatedAt time.Time
+}
+
 type PasswordReset struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
@@ -26,6 +33,14 @@ type RefreshToken struct {
 	CreatedAt time.Time
 	ExpiresAt time.Time
 	RevokedAt sql.NullTime
+}
+
+type Url struct {
+	ID        uuid.UUID
+	ShortCode string
+	Url       string
+	UserID    uuid.UUID
+	CreatedAt time.Time
 }
 
 type User struct {

@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/john-ayodeji/Linkrr/utils"
 )
-
-var Cfg *config.ApiConfig
 
 func SignUp(w http.ResponseWriter, r *http.Request) {
 	resp, err, statusCode := authService.SignUp(r)
