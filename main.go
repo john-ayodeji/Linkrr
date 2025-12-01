@@ -10,6 +10,7 @@ import (
 	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
 	"github.com/john-ayodeji/Linkrr/internal/events_workers"
+	"github.com/john-ayodeji/Linkrr/internal/services/analytics"
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/john-ayodeji/Linkrr/internal/services/redirect"
 	"github.com/john-ayodeji/Linkrr/internal/services/shortener"
@@ -37,6 +38,9 @@ func main() {
 		log.Fatal("JWT_SECRET not set in environment")
 	}
 
+	IpstackApiKey := os.Getenv("IPSTACK_API_KEY")
+	IpStackURL := os.Getenv("IPSTACK_URL")
+
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatalf("DB open failed: %v", err)
@@ -46,21 +50,26 @@ func main() {
 	}
 
 	cfg := &config.ApiConfig{
-		Port:      3000,
-		JWTSecret: jwtSecret,
-		Db:        database.New(db),
+		Port:          3030,
+		JWTSecret:     jwtSecret,
+		Db:            database.New(db),
+		IpStackApiKey: IpstackApiKey,
+		IpStackURl:    IpStackURL,
 	}
+
+	authService.Cfg = cfg
+	shortener.Cfg = cfg
+	redirect.Cfg = cfg
+	analytics.Cfg = cfg
 
 	for i := 0; i < 5; i++ {
 		go events_workers.SignUpEmailWorker(authService.SignUpEvent)
 		go events_workers.LoginEmailWorker(authService.LoginEvent)
 		go events_workers.ForgotPasswordEmailWorker(authService.ForgotPasswordEvent)
 		go events_workers.ChangedPasswordEmailWorker(authService.ResetPasswordEvent)
-	}
 
-	authService.Cfg = cfg
-	shortener.Cfg = cfg
-	redirect.Cfg = cfg
+		go analytics.GetClickData(redirect.RedirectEvent)
+	}
 
 	RegisterAuthRoutes(mux)
 	RegisterShortenerRoutes(mux)

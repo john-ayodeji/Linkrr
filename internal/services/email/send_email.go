@@ -63,10 +63,9 @@ func sendEmail(category, subject, text, html, name, email string) {
 	}
 	defer res.Body.Close()
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		utils.LogError(err.Error())
+	_, err1 := io.ReadAll(res.Body)
+	if err1 != nil {
+		utils.LogError(err1.Error())
 		return
 	}
-	fmt.Println(string(body))
 }

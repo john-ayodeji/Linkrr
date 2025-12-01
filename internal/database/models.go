@@ -18,6 +18,19 @@ type Alias struct {
 	CreatedAt time.Time
 }
 
+type Analytic struct {
+	ID        uuid.UUID
+	ShortCode string
+	Alias     sql.NullString
+	ClickedAt time.Time
+	Ip        string
+	Country   string
+	Referrer  sql.NullString
+	Device    string
+	Os        string
+	Browser   string
+}
+
 type PasswordReset struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID

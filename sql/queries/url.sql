@@ -15,3 +15,10 @@ LEFT JOIN aliases
     ON aliases.url_code = urls.short_code
 WHERE aliases.alias = $1
    OR urls.short_code = $2;
+
+-- name: GetShortCodeAndAlias :one
+SELECT urls.short_code AS code, aliases.alias AS alias
+FROM urls
+         LEFT JOIN aliases ON aliases.url_code = urls.short_code
+WHERE $1 IN (aliases.alias, urls.short_code)
+LIMIT 1;

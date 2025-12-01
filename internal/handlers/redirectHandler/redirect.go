@@ -15,5 +15,6 @@ func Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Cache-Control", "no-store")
 	http.Redirect(w, r, url, statusCode)
 }

@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 )
@@ -62,6 +63,26 @@ func (q *Queries) GetOriginalUrl(ctx context.Context, arg GetOriginalUrlParams) 
 	var link string
 	err := row.Scan(&link)
 	return link, err
+}
+
+const getShortCodeAndAlias = `-- name: GetShortCodeAndAlias :one
+SELECT urls.short_code AS code, aliases.alias AS alias
+FROM urls
+         LEFT JOIN aliases ON aliases.url_code = urls.short_code
+WHERE $1 IN (aliases.alias, urls.short_code)
+LIMIT 1
+`
+
+type GetShortCodeAndAliasRow struct {
+	Code  string
+	Alias sql.NullString
+}
+
+func (q *Queries) GetShortCodeAndAlias(ctx context.Context, alias string) (GetShortCodeAndAliasRow, error) {
+	row := q.db.QueryRowContext(ctx, getShortCodeAndAlias, alias)
+	var i GetShortCodeAndAliasRow
+	err := row.Scan(&i.Code, &i.Alias)
+	return i, err
 }
 
 const getURL = `-- name: GetURL :one
