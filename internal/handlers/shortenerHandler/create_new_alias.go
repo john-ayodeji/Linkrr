@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/john-ayodeji/Linkrr/internal/services/shortener"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 func CreateAlias(w http.ResponseWriter, r *http.Request) {

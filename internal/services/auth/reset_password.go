@@ -8,8 +8,7 @@ import (
 
 	"github.com/alexedwards/argon2id"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	email2 "github.com/john-ayodeji/Linkrr/internal/services/email"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type request struct {
@@ -20,6 +19,13 @@ type Response struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
+
+type ResetPasswordEmailData struct {
+	Name  string
+	Email string
+}
+
+var ResetPasswordEvent = make(chan ResetPasswordEmailData, 100)
 
 func ResetPassword(r *http.Request) (Response, error, int) {
 	token := r.URL.Query().Get("token")
@@ -64,13 +70,14 @@ func ResetPassword(r *http.Request) (Response, error, int) {
 
 	_ = Cfg.Db.SetUsed(r.Context())
 
-	go func(name, userEmail string) {
-		email2.SendPasswordChangedEmail(name, userEmail)
-	}(user.Username, user.Email)
-
 	resp := Response{
 		Status:  "success",
 		Message: "Password has been changed successfully, check your email for a confirmation",
+	}
+
+	ResetPasswordEvent <- ResetPasswordEmailData{
+		Name:  user.Username,
+		Email: user.Email,
 	}
 
 	return resp, nil, http.StatusAccepted

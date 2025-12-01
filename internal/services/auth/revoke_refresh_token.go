@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type Status struct {

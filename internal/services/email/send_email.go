@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type mailtrapEmail struct {

@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/john-ayodeji/Linkrr/internal/auth"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type AliasRequest struct {

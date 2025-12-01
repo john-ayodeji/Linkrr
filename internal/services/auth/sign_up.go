@@ -13,8 +13,7 @@ import (
 	"github.com/john-ayodeji/Linkrr/internal/auth"
 	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	"github.com/john-ayodeji/Linkrr/internal/services/email"
-	"github.com/john-ayodeji/Linkrr/utils"
+	utils2 "github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 var Cfg *config.ApiConfig
@@ -38,6 +37,8 @@ type signUp struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
+var SignUpEvent = make(chan UserData, 100)
+
 func SignUp(r *http.Request) (UserData, error, int) {
 	var user_cred signUp
 	decoder := json.NewDecoder(r.Body)
@@ -58,7 +59,7 @@ func SignUp(r *http.Request) (UserData, error, int) {
 		return UserData{}, fmt.Errorf("passwords don't match"), http.StatusBadRequest
 	}
 
-	hashedPassword, err := utils.HashPassword(user_cred.Password)
+	hashedPassword, err := utils2.HashPassword(user_cred.Password)
 	if err != nil {
 		return UserData{}, fmt.Errorf("something went wrong, try again later"), http.StatusInternalServerError
 	}
@@ -69,13 +70,13 @@ func SignUp(r *http.Request) (UserData, error, int) {
 		Password: hashedPassword,
 	})
 	if err != nil {
-		go utils.LogError(err.Error())
+		go utils2.LogError(err.Error())
 		return UserData{}, fmt.Errorf("something went wrong, try again later"), http.StatusInternalServerError
 	}
 
 	jwt, err := auth.MakeJWT(user.ID, Cfg.JWTSecret)
 	if err != nil {
-		go utils.LogError(err.Error())
+		go utils2.LogError(err.Error())
 		return UserData{}, fmt.Errorf("something went wrong, try again later"), http.StatusInternalServerError
 	}
 
@@ -103,9 +104,7 @@ func SignUp(r *http.Request) (UserData, error, int) {
 		RefreshToken: refreshToken,
 	}
 
-	go func(name, userEmail string) {
-		email.SendWelcomeEmail(name, userEmail)
-	}(resp.UserName, resp.Email)
+	SignUpEvent <- resp
 
 	return resp, nil, 201
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 func SignUp(w http.ResponseWriter, r *http.Request) {

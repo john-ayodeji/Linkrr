@@ -11,9 +11,10 @@ import (
 
 	"github.com/john-ayodeji/Linkrr/internal/auth"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	"github.com/john-ayodeji/Linkrr/internal/services/email"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
+
+var LoginEvent = make(chan UserData, 100)
 
 func Login(r *http.Request) (UserData, error, int) {
 	type loginCred struct {
@@ -66,9 +67,7 @@ func Login(r *http.Request) (UserData, error, int) {
 		RefreshToken: refreshToken,
 	}
 
-	go func(name, userEmail string) {
-		email.SendLoginWelcomeEmail(name, userEmail)
-	}(data.Username, data.Email)
+	LoginEvent <- resp
 
 	return resp, nil, http.StatusOK
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
+	"github.com/john-ayodeji/Linkrr/internal/events_workers"
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/john-ayodeji/Linkrr/internal/services/redirect"
 	"github.com/john-ayodeji/Linkrr/internal/services/shortener"
@@ -48,6 +49,13 @@ func main() {
 		Port:      3000,
 		JWTSecret: jwtSecret,
 		Db:        database.New(db),
+	}
+
+	for i := 0; i < 5; i++ {
+		go events_workers.SignUpEmailWorker(authService.SignUpEvent)
+		go events_workers.LoginEmailWorker(authService.LoginEvent)
+		go events_workers.ForgotPasswordEmailWorker(authService.ForgotPasswordEvent)
+		go events_workers.ChangedPasswordEmailWorker(authService.ResetPasswordEvent)
 	}
 
 	authService.Cfg = cfg

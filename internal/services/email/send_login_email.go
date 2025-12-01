@@ -3,7 +3,7 @@ package email
 import (
 	"fmt"
 
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 func SendLoginWelcomeEmail(name, email string) {

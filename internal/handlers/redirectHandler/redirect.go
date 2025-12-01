@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/john-ayodeji/Linkrr/internal/services/redirect"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 func Redirect(w http.ResponseWriter, r *http.Request) {

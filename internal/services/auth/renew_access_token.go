@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/john-ayodeji/Linkrr/internal/auth"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type Token struct {

@@ -10,14 +10,21 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/john-ayodeji/Linkrr/internal/database"
-	email2 "github.com/john-ayodeji/Linkrr/internal/services/email"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 type cred struct {
 	Email    string `json:"email"`
 	Username string `json:"username"`
 }
+
+type ForgotPasswordEmailData struct {
+	Name     string
+	Email    string
+	ResetURL string
+}
+
+var ForgotPasswordEvent = make(chan ForgotPasswordEmailData, 100)
 
 func ForgotPassword(r *http.Request) (Response, error, int) {
 	var userCred cred
@@ -47,13 +54,16 @@ func ForgotPassword(r *http.Request) (Response, error, int) {
 	}
 
 	resetLink := fmt.Sprintf("%v/api/v1/auth/reset-password?token=%v", r.Host, token)
-	go func(name, userEmail, url string) {
-		email2.SendPasswordResetEmail(name, userEmail, url)
-	}(user.Username, user.Email, resetLink)
 
 	resp := Response{
 		Status:  "success",
 		Message: "Check your email for reset instructions if an account exists.",
+	}
+
+	ForgotPasswordEvent <- ForgotPasswordEmailData{
+		Name:     user.Username,
+		Email:    user.Email,
+		ResetURL: resetLink,
 	}
 
 	return resp, nil, http.StatusOK

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	authService "github.com/john-ayodeji/Linkrr/internal/services/auth"
-	"github.com/john-ayodeji/Linkrr/utils"
+	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
 
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
