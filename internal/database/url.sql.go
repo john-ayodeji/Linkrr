@@ -102,3 +102,55 @@ func (q *Queries) GetURL(ctx context.Context, shortCode string) (Url, error) {
 	)
 	return i, err
 }
+
+const getURLsForUser = `-- name: GetURLsForUser :many
+SELECT
+    users.id AS user_id,
+    users.username AS name,
+    urls.short_code,
+    urls.url,
+    aliases.alias AS alias
+FROM urls
+         LEFT JOIN aliases
+                   ON urls.short_code = aliases.url_code
+         JOIN users
+              ON users.id = urls.user_id
+WHERE urls.user_id = $1
+`
+
+type GetURLsForUserRow struct {
+	UserID    uuid.UUID
+	Name      string
+	ShortCode string
+	Url       string
+	Alias     sql.NullString
+}
+
+func (q *Queries) GetURLsForUser(ctx context.Context, userID uuid.UUID) ([]GetURLsForUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLsForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLsForUserRow
+	for rows.Next() {
+		var i GetURLsForUserRow
+		if err := rows.Scan(
+			&i.UserID,
+			&i.Name,
+			&i.ShortCode,
+			&i.Url,
+			&i.Alias,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

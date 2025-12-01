@@ -14,6 +14,7 @@ import (
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/john-ayodeji/Linkrr/internal/services/redirect"
 	"github.com/john-ayodeji/Linkrr/internal/services/shortener"
+	"github.com/john-ayodeji/Linkrr/internal/services/users"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
@@ -61,6 +62,7 @@ func main() {
 	shortener.Cfg = cfg
 	redirect.Cfg = cfg
 	analytics.Cfg = cfg
+	users.Cfg = cfg
 
 	for i := 0; i < 5; i++ {
 		go events_workers.SignUpEmailWorker(authService.SignUpEvent)
@@ -74,6 +76,7 @@ func main() {
 	RegisterAuthRoutes(mux)
 	RegisterShortenerRoutes(mux)
 	RegisterRedirectRoute(mux)
+	RegisterUserRoutes(mux)
 
 	addr := fmt.Sprintf("localhost:%d", cfg.Port)
 	server := http.Server{Addr: addr, Handler: mux}

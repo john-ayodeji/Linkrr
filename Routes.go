@@ -6,6 +6,7 @@ import (
 	"github.com/john-ayodeji/Linkrr/internal/handlers/auth"
 	"github.com/john-ayodeji/Linkrr/internal/handlers/redirectHandler"
 	"github.com/john-ayodeji/Linkrr/internal/handlers/shortenerHandler"
+	"github.com/john-ayodeji/Linkrr/internal/handlers/userHandler"
 )
 
 func RegisterAuthRoutes(mux *http.ServeMux) {
@@ -24,4 +25,8 @@ func RegisterShortenerRoutes(mux *http.ServeMux) {
 
 func RegisterRedirectRoute(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{urlCode}", redirectHandler.Redirect)
+}
+
+func RegisterUserRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/v1/links/me", userHandler.GetMyLinks)
 }
