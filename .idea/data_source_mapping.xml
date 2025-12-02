@@ -5,9 +5,11 @@
     <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/a5fbfc4e-bb94-441a-a42e-e750b5348ceb/console_1.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/queries/aliases.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/queries/analytics.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
+    <file url="file://$PROJECT_DIR$/sql/queries/analytics_aggregation.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/queries/url.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/schema/002_refresh_tokens.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/schema/005_aliases.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
     <file url="file://$PROJECT_DIR$/sql/schema/006_analytics.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
+    <file url="file://$PROJECT_DIR$/sql/schema/008_analytics.sql" value="a5fbfc4e-bb94-441a-a42e-e750b5348ceb" />
   </component>
 </project>

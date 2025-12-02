@@ -3,11 +3,13 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/sql/queries/aliases.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/queries/analytics.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sql/queries/analytics_aggregation.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/queries/refresh_token.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/queries/url.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/schema/002_refresh_tokens.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/schema/005_aliases.sql" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/sql/schema/006_analytics.sql" dialect="PostgreSQL" />
+    <file url="file://$PROJECT_DIR$/sql/schema/008_analytics.sql" dialect="PostgreSQL" />
     <file url="PROJECT" dialect="PostgreSQL" />
   </component>
 </project>

@@ -18,6 +18,19 @@ import (
 
 var Cfg *config.ApiConfig
 
+type AnalyticsData struct {
+	ShortCode string
+	Alias     string
+	Country   string
+	City      string
+	Device    string
+	Browser   string
+	Referrer  string
+	IP        string
+}
+
+var AnalyticsEvent = make(chan AnalyticsData, 100)
+
 func GetClickData(urldata <-chan redirect.URLData) {
 	for data := range urldata {
 		codeAlias, err := Cfg.Db.GetShortCodeAndAlias(context.Background(), data.UrlCode)
@@ -26,16 +39,17 @@ func GetClickData(urldata <-chan redirect.URLData) {
 		}
 		ua := useragent.New(data.UserAgent)
 		browser, _ := ua.Browser()
-		country, _ := GetIpLocation(data.IP)
+		country, city, _ := GetIpLocation(data.IP)
 
-		err1 := Cfg.Db.CreateAnalyticsData(context.Background(), database.CreateAnalyticsDataParams{
+		analyticsData, err1 := Cfg.Db.CreateAnalyticsData(context.Background(), database.CreateAnalyticsDataParams{
 			ID:        uuid.New(),
 			ShortCode: codeAlias.Code,
 			Alias:     codeAlias.Alias,
 			ClickedAt: data.ClickedAt,
 			Ip:        data.IP,
 			Country:   country,
-			Referrer:  sql.NullString{String: data.Referer},
+			City:      city,
+			Referrer:  sql.NullString{String: data.Referer, Valid: data.Referer != ""},
 			Device:    ua.Platform(),
 			Os:        ua.OS(),
 			Browser:   browser,
@@ -43,16 +57,33 @@ func GetClickData(urldata <-chan redirect.URLData) {
 		if err1 != nil {
 			utils.LogError("failed to save analytics data")
 		}
+		
+		referrer := "direct"
+		if data.Referer != "" {
+			referrer = data.Referer
+		}
+		
+		AnalyticsEvent <- AnalyticsData{
+			ShortCode: analyticsData.ShortCode,
+			Alias:     analyticsData.Alias.String,
+			Country:   country,
+			City:      city,
+			Device:    ua.Platform(),
+			Browser:   browser,
+			Referrer:  referrer,
+			IP:        data.IP,
+		}
 	}
 }
 
-func GetIpLocation(ip string) (string, error) {
+func GetIpLocation(ip string) (string, string, error) {
 	type location struct {
-		CountryCode string `json:"country_name"`
+		Country string `json:"country_name"`
+		City    string `json:"city"`
 	}
-	req, err := http.NewRequest("GET", Cfg.IpStackURl+ip+"?access_key="+Cfg.IpStackApiKey+"&fields=country_name", nil)
+	req, err := http.NewRequest("GET", Cfg.IpStackURl+ip+"?access_key="+Cfg.IpStackApiKey+"&fields=country_name,city", nil)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch location")
+		return "", "", fmt.Errorf("failed to fetch location")
 	}
 
 	client := http.Client{
@@ -60,14 +91,16 @@ func GetIpLocation(ip string) (string, error) {
 	}
 
 	res, err := client.Do(req)
-
+	if err != nil {
+		return "", "", fmt.Errorf("failed to fetch location")
+	}
 	defer res.Body.Close()
 
 	var country location
 	decoded := json.NewDecoder(res.Body)
 	if err := decoded.Decode(&country); err != nil {
-		return "", fmt.Errorf("failed to decode response body")
+		return "", "", fmt.Errorf("failed to decode response body")
 	}
 
-	return country.CountryCode, nil
+	return country.Country, country.City, nil
 }

@@ -73,6 +73,8 @@ func main() {
 		go analytics.GetClickData(redirect.RedirectEvent)
 	}
 
+	go analytics.AggregateAnalytics(analytics.AnalyticsEvent)
+
 	RegisterAuthRoutes(mux)
 	RegisterShortenerRoutes(mux)
 	RegisterRedirectRoute(mux)

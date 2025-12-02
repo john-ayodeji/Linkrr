@@ -36,3 +36,18 @@ func (q *Queries) CreateAlias(ctx context.Context, arg CreateAliasParams) (Alias
 	)
 	return i, err
 }
+
+const getUrlOwnerByAlias = `-- name: GetUrlOwnerByAlias :one
+SELECT u.user_id
+FROM aliases a
+         JOIN urls u ON u.short_code = a.url_code
+WHERE a.alias = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUrlOwnerByAlias(ctx context.Context, alias string) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getUrlOwnerByAlias, alias)
+	var user_id uuid.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}

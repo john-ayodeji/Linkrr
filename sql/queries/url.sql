@@ -36,3 +36,9 @@ FROM urls
          JOIN users
               ON users.id = urls.user_id
 WHERE urls.user_id = $1;
+
+-- name: GetUrlOwnerByShortCode :one
+SELECT user_id
+FROM urls
+WHERE short_code = $1
+LIMIT 1;

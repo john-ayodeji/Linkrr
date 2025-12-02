@@ -29,6 +29,101 @@ type Analytic struct {
 	Device    string
 	Os        string
 	Browser   string
+	City      string
+}
+
+type AnalyticsAliasBrowser struct {
+	ShortCode   string
+	Alias       string
+	Browser     string
+	TotalClicks int32
+}
+
+type AnalyticsAliasDaily struct {
+	ShortCode      string
+	Alias          string
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+type AnalyticsAliasDevice struct {
+	ShortCode   string
+	Alias       string
+	Device      string
+	TotalClicks int32
+}
+
+type AnalyticsAliasGeo struct {
+	ShortCode   string
+	Alias       string
+	Country     string
+	City        string
+	TotalClicks int32
+}
+
+type AnalyticsAliasReferrer struct {
+	ShortCode   string
+	Alias       string
+	Referrer    string
+	TotalClicks int32
+}
+
+type AnalyticsUrlBrowser struct {
+	ShortCode   string
+	Browser     string
+	TotalClicks int32
+}
+
+type AnalyticsUrlDaily struct {
+	ShortCode      string
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+type AnalyticsUrlDevice struct {
+	ShortCode   string
+	Device      string
+	TotalClicks int32
+}
+
+type AnalyticsUrlGeo struct {
+	ShortCode   string
+	Country     string
+	City        string
+	TotalClicks int32
+}
+
+type AnalyticsUrlReferrer struct {
+	ShortCode   string
+	Referrer    string
+	TotalClicks int32
+}
+
+type AnalyticsUserBrowser struct {
+	UserID      uuid.UUID
+	Browser     string
+	TotalClicks int32
+}
+
+type AnalyticsUserDaily struct {
+	UserID         uuid.UUID
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+type AnalyticsUserGeo struct {
+	UserID      uuid.UUID
+	Country     string
+	TotalClicks int32
+}
+
+type AnalyticsUserTopLink struct {
+	UserID      uuid.UUID
+	ShortCode   string
+	TotalClicks int32
 }
 
 type PasswordReset struct {

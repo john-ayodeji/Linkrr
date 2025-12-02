@@ -13,11 +13,395 @@ import (
 	"github.com/google/uuid"
 )
 
-const createAnalyticsData = `-- name: CreateAnalyticsData :exec
-INSERT INTO analytics (
-    id, short_code, alias, clicked_at, ip, country, referrer, device, os, browser
+const browserClicksGlobal = `-- name: BrowserClicksGlobal :many
+SELECT browser, COUNT(*) AS clicks
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
 )
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+GROUP BY browser
+ORDER BY clicks DESC
+`
+
+type BrowserClicksGlobalRow struct {
+	Browser string
+	Clicks  int64
+}
+
+func (q *Queries) BrowserClicksGlobal(ctx context.Context, userID uuid.UUID) ([]BrowserClicksGlobalRow, error) {
+	rows, err := q.db.QueryContext(ctx, browserClicksGlobal, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BrowserClicksGlobalRow
+	for rows.Next() {
+		var i BrowserClicksGlobalRow
+		if err := rows.Scan(&i.Browser, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const browserClicksPerAlias = `-- name: BrowserClicksPerAlias :many
+SELECT browser, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY browser
+ORDER BY clicks DESC
+`
+
+type BrowserClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type BrowserClicksPerAliasRow struct {
+	Browser string
+	Clicks  int64
+}
+
+func (q *Queries) BrowserClicksPerAlias(ctx context.Context, arg BrowserClicksPerAliasParams) ([]BrowserClicksPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, browserClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BrowserClicksPerAliasRow
+	for rows.Next() {
+		var i BrowserClicksPerAliasRow
+		if err := rows.Scan(&i.Browser, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const browserClicksPerURL = `-- name: BrowserClicksPerURL :many
+SELECT browser, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY browser
+ORDER BY clicks DESC
+`
+
+type BrowserClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type BrowserClicksPerURLRow struct {
+	Browser string
+	Clicks  int64
+}
+
+func (q *Queries) BrowserClicksPerURL(ctx context.Context, arg BrowserClicksPerURLParams) ([]BrowserClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, browserClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BrowserClicksPerURLRow
+	for rows.Next() {
+		var i BrowserClicksPerURLRow
+		if err := rows.Scan(&i.Browser, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const cityClicksPerAlias = `-- name: CityClicksPerAlias :many
+SELECT city, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY city
+ORDER BY clicks DESC
+`
+
+type CityClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type CityClicksPerAliasRow struct {
+	City   string
+	Clicks int64
+}
+
+func (q *Queries) CityClicksPerAlias(ctx context.Context, arg CityClicksPerAliasParams) ([]CityClicksPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, cityClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CityClicksPerAliasRow
+	for rows.Next() {
+		var i CityClicksPerAliasRow
+		if err := rows.Scan(&i.City, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const cityClicksPerURL = `-- name: CityClicksPerURL :many
+SELECT city, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY city
+ORDER BY clicks DESC
+`
+
+type CityClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type CityClicksPerURLRow struct {
+	City   string
+	Clicks int64
+}
+
+func (q *Queries) CityClicksPerURL(ctx context.Context, arg CityClicksPerURLParams) ([]CityClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, cityClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CityClicksPerURLRow
+	for rows.Next() {
+		var i CityClicksPerURLRow
+		if err := rows.Scan(&i.City, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const clicksByRefererPerURL = `-- name: ClicksByRefererPerURL :many
+SELECT COALESCE(referrer, 'direct') AS referrer, COUNT(*) AS total
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY referrer
+ORDER BY total DESC
+`
+
+type ClicksByRefererPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type ClicksByRefererPerURLRow struct {
+	Referrer string
+	Total    int64
+}
+
+func (q *Queries) ClicksByRefererPerURL(ctx context.Context, arg ClicksByRefererPerURLParams) ([]ClicksByRefererPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, clicksByRefererPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ClicksByRefererPerURLRow
+	for rows.Next() {
+		var i ClicksByRefererPerURLRow
+		if err := rows.Scan(&i.Referrer, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countryClicksGlobal = `-- name: CountryClicksGlobal :many
+SELECT country, COUNT(*) AS clicks
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
+)
+GROUP BY country
+ORDER BY clicks DESC
+`
+
+type CountryClicksGlobalRow struct {
+	Country string
+	Clicks  int64
+}
+
+func (q *Queries) CountryClicksGlobal(ctx context.Context, userID uuid.UUID) ([]CountryClicksGlobalRow, error) {
+	rows, err := q.db.QueryContext(ctx, countryClicksGlobal, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CountryClicksGlobalRow
+	for rows.Next() {
+		var i CountryClicksGlobalRow
+		if err := rows.Scan(&i.Country, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countryClicksPerAlias = `-- name: CountryClicksPerAlias :many
+SELECT country, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY country
+ORDER BY clicks DESC
+`
+
+type CountryClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type CountryClicksPerAliasRow struct {
+	Country string
+	Clicks  int64
+}
+
+func (q *Queries) CountryClicksPerAlias(ctx context.Context, arg CountryClicksPerAliasParams) ([]CountryClicksPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, countryClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CountryClicksPerAliasRow
+	for rows.Next() {
+		var i CountryClicksPerAliasRow
+		if err := rows.Scan(&i.Country, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const countryClicksPerURL = `-- name: CountryClicksPerURL :many
+SELECT country, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY country
+ORDER BY clicks DESC
+`
+
+type CountryClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type CountryClicksPerURLRow struct {
+	Country string
+	Clicks  int64
+}
+
+func (q *Queries) CountryClicksPerURL(ctx context.Context, arg CountryClicksPerURLParams) ([]CountryClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, countryClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CountryClicksPerURLRow
+	for rows.Next() {
+		var i CountryClicksPerURLRow
+		if err := rows.Scan(&i.Country, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const createAnalyticsData = `-- name: CreateAnalyticsData :one
+INSERT INTO analytics (
+    id, short_code, alias, clicked_at, ip, country, city, referrer, device, os, browser
+)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, short_code, alias, clicked_at, ip, country, referrer, device, os, browser, city
 `
 
 type CreateAnalyticsDataParams struct {
@@ -27,24 +411,580 @@ type CreateAnalyticsDataParams struct {
 	ClickedAt time.Time
 	Ip        string
 	Country   string
+	City      string
 	Referrer  sql.NullString
 	Device    string
 	Os        string
 	Browser   string
 }
 
-func (q *Queries) CreateAnalyticsData(ctx context.Context, arg CreateAnalyticsDataParams) error {
-	_, err := q.db.ExecContext(ctx, createAnalyticsData,
+func (q *Queries) CreateAnalyticsData(ctx context.Context, arg CreateAnalyticsDataParams) (Analytic, error) {
+	row := q.db.QueryRowContext(ctx, createAnalyticsData,
 		arg.ID,
 		arg.ShortCode,
 		arg.Alias,
 		arg.ClickedAt,
 		arg.Ip,
 		arg.Country,
+		arg.City,
 		arg.Referrer,
 		arg.Device,
 		arg.Os,
 		arg.Browser,
 	)
-	return err
+	var i Analytic
+	err := row.Scan(
+		&i.ID,
+		&i.ShortCode,
+		&i.Alias,
+		&i.ClickedAt,
+		&i.Ip,
+		&i.Country,
+		&i.Referrer,
+		&i.Device,
+		&i.Os,
+		&i.Browser,
+		&i.City,
+	)
+	return i, err
+}
+
+const dailyClicksGlobal = `-- name: DailyClicksGlobal :many
+SELECT DATE(clicked_at) AS day, COUNT(*) AS total
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
+)
+GROUP BY day
+ORDER BY day
+`
+
+type DailyClicksGlobalRow struct {
+	Day   time.Time
+	Total int64
+}
+
+func (q *Queries) DailyClicksGlobal(ctx context.Context, userID uuid.UUID) ([]DailyClicksGlobalRow, error) {
+	rows, err := q.db.QueryContext(ctx, dailyClicksGlobal, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DailyClicksGlobalRow
+	for rows.Next() {
+		var i DailyClicksGlobalRow
+		if err := rows.Scan(&i.Day, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dailyClicksPerAlias = `-- name: DailyClicksPerAlias :many
+SELECT DATE(clicked_at) AS day, COUNT(*) AS total
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY day
+ORDER BY day
+`
+
+type DailyClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type DailyClicksPerAliasRow struct {
+	Day   time.Time
+	Total int64
+}
+
+func (q *Queries) DailyClicksPerAlias(ctx context.Context, arg DailyClicksPerAliasParams) ([]DailyClicksPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, dailyClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DailyClicksPerAliasRow
+	for rows.Next() {
+		var i DailyClicksPerAliasRow
+		if err := rows.Scan(&i.Day, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const dailyClicksPerURL = `-- name: DailyClicksPerURL :many
+SELECT DATE(clicked_at) AS day, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY day
+ORDER BY day
+`
+
+type DailyClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type DailyClicksPerURLRow struct {
+	Day    time.Time
+	Clicks int64
+}
+
+func (q *Queries) DailyClicksPerURL(ctx context.Context, arg DailyClicksPerURLParams) ([]DailyClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, dailyClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DailyClicksPerURLRow
+	for rows.Next() {
+		var i DailyClicksPerURLRow
+		if err := rows.Scan(&i.Day, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const deviceClicksPerAlias = `-- name: DeviceClicksPerAlias :many
+SELECT device, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY device
+ORDER BY clicks DESC
+`
+
+type DeviceClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type DeviceClicksPerAliasRow struct {
+	Device string
+	Clicks int64
+}
+
+func (q *Queries) DeviceClicksPerAlias(ctx context.Context, arg DeviceClicksPerAliasParams) ([]DeviceClicksPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, deviceClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DeviceClicksPerAliasRow
+	for rows.Next() {
+		var i DeviceClicksPerAliasRow
+		if err := rows.Scan(&i.Device, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const deviceClicksPerURL = `-- name: DeviceClicksPerURL :many
+SELECT device, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY device
+ORDER BY clicks DESC
+`
+
+type DeviceClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type DeviceClicksPerURLRow struct {
+	Device string
+	Clicks int64
+}
+
+func (q *Queries) DeviceClicksPerURL(ctx context.Context, arg DeviceClicksPerURLParams) ([]DeviceClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, deviceClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DeviceClicksPerURLRow
+	for rows.Next() {
+		var i DeviceClicksPerURLRow
+		if err := rows.Scan(&i.Device, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const monthlyClicksPerURL = `-- name: MonthlyClicksPerURL :many
+SELECT DATE_TRUNC('month', clicked_at) AS month, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY month
+ORDER BY month
+`
+
+type MonthlyClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type MonthlyClicksPerURLRow struct {
+	Month  int64
+	Clicks int64
+}
+
+func (q *Queries) MonthlyClicksPerURL(ctx context.Context, arg MonthlyClicksPerURLParams) ([]MonthlyClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, monthlyClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MonthlyClicksPerURLRow
+	for rows.Next() {
+		var i MonthlyClicksPerURLRow
+		if err := rows.Scan(&i.Month, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const refererPerAlias = `-- name: RefererPerAlias :many
+SELECT COALESCE(referrer, 'direct') AS referrer, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+GROUP BY referrer
+ORDER BY clicks DESC
+`
+
+type RefererPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+type RefererPerAliasRow struct {
+	Referrer string
+	Clicks   int64
+}
+
+func (q *Queries) RefererPerAlias(ctx context.Context, arg RefererPerAliasParams) ([]RefererPerAliasRow, error) {
+	rows, err := q.db.QueryContext(ctx, refererPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RefererPerAliasRow
+	for rows.Next() {
+		var i RefererPerAliasRow
+		if err := rows.Scan(&i.Referrer, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const refererPerURL = `-- name: RefererPerURL :many
+SELECT COALESCE(referrer, 'direct') AS referrer, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY referrer
+ORDER BY clicks DESC
+`
+
+type RefererPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type RefererPerURLRow struct {
+	Referrer string
+	Clicks   int64
+}
+
+func (q *Queries) RefererPerURL(ctx context.Context, arg RefererPerURLParams) ([]RefererPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, refererPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []RefererPerURLRow
+	for rows.Next() {
+		var i RefererPerURLRow
+		if err := rows.Scan(&i.Referrer, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const topPerformingLinksPerUser = `-- name: TopPerformingLinksPerUser :many
+SELECT short_code, COUNT(*) AS total
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
+)
+GROUP BY short_code
+ORDER BY total DESC
+`
+
+type TopPerformingLinksPerUserRow struct {
+	ShortCode string
+	Total     int64
+}
+
+func (q *Queries) TopPerformingLinksPerUser(ctx context.Context, userID uuid.UUID) ([]TopPerformingLinksPerUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, topPerformingLinksPerUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []TopPerformingLinksPerUserRow
+	for rows.Next() {
+		var i TopPerformingLinksPerUserRow
+		if err := rows.Scan(&i.ShortCode, &i.Total); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const totalClicksGlobal = `-- name: TotalClicksGlobal :one
+SELECT COUNT(*) AS total
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
+)
+`
+
+func (q *Queries) TotalClicksGlobal(ctx context.Context, userID uuid.UUID) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalClicksGlobal, userID)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
+const totalClicksPerAlias = `-- name: TotalClicksPerAlias :one
+SELECT COUNT(*) AS total
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+`
+
+type TotalClicksPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+func (q *Queries) TotalClicksPerAlias(ctx context.Context, arg TotalClicksPerAliasParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalClicksPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	var total int64
+	err := row.Scan(&total)
+	return total, err
+}
+
+const totalClicksPerURL = `-- name: TotalClicksPerURL :one
+SELECT COUNT(*) AS total_clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+`
+
+type TotalClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+func (q *Queries) TotalClicksPerURL(ctx context.Context, arg TotalClicksPerURLParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, totalClicksPerURL, arg.ShortCode, arg.UserID)
+	var total_clicks int64
+	err := row.Scan(&total_clicks)
+	return total_clicks, err
+}
+
+const uniqueVisitorsGlobal = `-- name: UniqueVisitorsGlobal :one
+SELECT COUNT(DISTINCT ip) AS unique_visitors
+FROM analytics
+WHERE short_code IN (
+    SELECT short_code FROM urls WHERE user_id = $1
+)
+`
+
+func (q *Queries) UniqueVisitorsGlobal(ctx context.Context, userID uuid.UUID) (int64, error) {
+	row := q.db.QueryRowContext(ctx, uniqueVisitorsGlobal, userID)
+	var unique_visitors int64
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
+}
+
+const uniqueVisitorsPerAlias = `-- name: UniqueVisitorsPerAlias :one
+SELECT COUNT(DISTINCT ip) AS unique_visitors
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+  AND analytics.alias = $3
+`
+
+type UniqueVisitorsPerAliasParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+	Alias     sql.NullString
+}
+
+func (q *Queries) UniqueVisitorsPerAlias(ctx context.Context, arg UniqueVisitorsPerAliasParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, uniqueVisitorsPerAlias, arg.ShortCode, arg.UserID, arg.Alias)
+	var unique_visitors int64
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
+}
+
+const uniqueVisitorsPerURL = `-- name: UniqueVisitorsPerURL :one
+SELECT COUNT(DISTINCT ip) AS unique_visitors
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+`
+
+type UniqueVisitorsPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+func (q *Queries) UniqueVisitorsPerURL(ctx context.Context, arg UniqueVisitorsPerURLParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, uniqueVisitorsPerURL, arg.ShortCode, arg.UserID)
+	var unique_visitors int64
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
+}
+
+const weeklyClicksPerURL = `-- name: WeeklyClicksPerURL :many
+SELECT DATE_TRUNC('week', clicked_at) AS week, COUNT(*) AS clicks
+FROM analytics
+         JOIN urls ON urls.short_code = analytics.short_code
+WHERE analytics.short_code = $1
+  AND urls.user_id = $2
+GROUP BY week
+ORDER BY week
+`
+
+type WeeklyClicksPerURLParams struct {
+	ShortCode string
+	UserID    uuid.UUID
+}
+
+type WeeklyClicksPerURLRow struct {
+	Week   int64
+	Clicks int64
+}
+
+func (q *Queries) WeeklyClicksPerURL(ctx context.Context, arg WeeklyClicksPerURLParams) ([]WeeklyClicksPerURLRow, error) {
+	rows, err := q.db.QueryContext(ctx, weeklyClicksPerURL, arg.ShortCode, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []WeeklyClicksPerURLRow
+	for rows.Next() {
+		var i WeeklyClicksPerURLRow
+		if err := rows.Scan(&i.Week, &i.Clicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

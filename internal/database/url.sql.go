@@ -154,3 +154,17 @@ func (q *Queries) GetURLsForUser(ctx context.Context, userID uuid.UUID) ([]GetUR
 	}
 	return items, nil
 }
+
+const getUrlOwnerByShortCode = `-- name: GetUrlOwnerByShortCode :one
+SELECT user_id
+FROM urls
+WHERE short_code = $1
+LIMIT 1
+`
+
+func (q *Queries) GetUrlOwnerByShortCode(ctx context.Context, shortCode string) (uuid.UUID, error) {
+	row := q.db.QueryRowContext(ctx, getUrlOwnerByShortCode, shortCode)
+	var user_id uuid.UUID
+	err := row.Scan(&user_id)
+	return user_id, err
+}
