@@ -79,6 +79,7 @@ func main() {
 	RegisterShortenerRoutes(mux)
 	RegisterRedirectRoute(mux)
 	RegisterUserRoutes(mux)
+	RegisterAnalyticsRoutes(mux)
 
 	addr := fmt.Sprintf("localhost:%d", cfg.Port)
 	server := http.Server{Addr: addr, Handler: mux}

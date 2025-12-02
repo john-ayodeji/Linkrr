@@ -13,6 +13,250 @@ import (
 	"github.com/google/uuid"
 )
 
+const getAliasBrowserClicks = `-- name: GetAliasBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_alias_browser
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetAliasBrowserClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+type GetAliasBrowserClicksRow struct {
+	Browser     string
+	TotalClicks int32
+}
+
+func (q *Queries) GetAliasBrowserClicks(ctx context.Context, arg GetAliasBrowserClicksParams) ([]GetAliasBrowserClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAliasBrowserClicks, arg.ShortCode, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAliasBrowserClicksRow
+	for rows.Next() {
+		var i GetAliasBrowserClicksRow
+		if err := rows.Scan(&i.Browser, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAliasDailyClicks = `-- name: GetAliasDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2
+ORDER BY date DESC
+LIMIT 30
+`
+
+type GetAliasDailyClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+type GetAliasDailyClicksRow struct {
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+func (q *Queries) GetAliasDailyClicks(ctx context.Context, arg GetAliasDailyClicksParams) ([]GetAliasDailyClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAliasDailyClicks, arg.ShortCode, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAliasDailyClicksRow
+	for rows.Next() {
+		var i GetAliasDailyClicksRow
+		if err := rows.Scan(&i.Date, &i.TotalClicks, &i.UniqueVisitors); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAliasDeviceClicks = `-- name: GetAliasDeviceClicks :many
+SELECT device, total_clicks
+FROM analytics_alias_device
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+`
+
+type GetAliasDeviceClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+type GetAliasDeviceClicksRow struct {
+	Device      string
+	TotalClicks int32
+}
+
+func (q *Queries) GetAliasDeviceClicks(ctx context.Context, arg GetAliasDeviceClicksParams) ([]GetAliasDeviceClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAliasDeviceClicks, arg.ShortCode, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAliasDeviceClicksRow
+	for rows.Next() {
+		var i GetAliasDeviceClicksRow
+		if err := rows.Scan(&i.Device, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAliasGeoClicks = `-- name: GetAliasGeoClicks :many
+SELECT country, city, total_clicks
+FROM analytics_alias_geo
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetAliasGeoClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+type GetAliasGeoClicksRow struct {
+	Country     string
+	City        string
+	TotalClicks int32
+}
+
+func (q *Queries) GetAliasGeoClicks(ctx context.Context, arg GetAliasGeoClicksParams) ([]GetAliasGeoClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAliasGeoClicks, arg.ShortCode, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAliasGeoClicksRow
+	for rows.Next() {
+		var i GetAliasGeoClicksRow
+		if err := rows.Scan(&i.Country, &i.City, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAliasReferrerClicks = `-- name: GetAliasReferrerClicks :many
+SELECT referrer, total_clicks
+FROM analytics_alias_referrer
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetAliasReferrerClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+type GetAliasReferrerClicksRow struct {
+	Referrer    string
+	TotalClicks int32
+}
+
+func (q *Queries) GetAliasReferrerClicks(ctx context.Context, arg GetAliasReferrerClicksParams) ([]GetAliasReferrerClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAliasReferrerClicks, arg.ShortCode, arg.Alias)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAliasReferrerClicksRow
+	for rows.Next() {
+		var i GetAliasReferrerClicksRow
+		if err := rows.Scan(&i.Referrer, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getAliasTotalClicks = `-- name: GetAliasTotalClicks :one
+
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2
+`
+
+type GetAliasTotalClicksParams struct {
+	ShortCode string
+	Alias     string
+}
+
+// Alias-level aggregate reads
+func (q *Queries) GetAliasTotalClicks(ctx context.Context, arg GetAliasTotalClicksParams) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getAliasTotalClicks, arg.ShortCode, arg.Alias)
+	var total_clicks interface{}
+	err := row.Scan(&total_clicks)
+	return total_clicks, err
+}
+
+const getAliasUniqueVisitors = `-- name: GetAliasUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2
+`
+
+type GetAliasUniqueVisitorsParams struct {
+	ShortCode string
+	Alias     string
+}
+
+func (q *Queries) GetAliasUniqueVisitors(ctx context.Context, arg GetAliasUniqueVisitorsParams) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getAliasUniqueVisitors, arg.ShortCode, arg.Alias)
+	var unique_visitors interface{}
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
+}
+
 const getClickEventData = `-- name: GetClickEventData :one
 
 SELECT
@@ -70,6 +314,390 @@ func (q *Queries) GetClickEventData(ctx context.Context, arg GetClickEventDataPa
 		&i.UserID,
 	)
 	return i, err
+}
+
+const getURLBrowserClicks = `-- name: GetURLBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_url_browser
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetURLBrowserClicksRow struct {
+	Browser     string
+	TotalClicks int32
+}
+
+func (q *Queries) GetURLBrowserClicks(ctx context.Context, shortCode string) ([]GetURLBrowserClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLBrowserClicks, shortCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLBrowserClicksRow
+	for rows.Next() {
+		var i GetURLBrowserClicksRow
+		if err := rows.Scan(&i.Browser, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLDailyClicks = `-- name: GetURLDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_url_daily
+WHERE short_code = $1
+ORDER BY date DESC
+LIMIT 30
+`
+
+type GetURLDailyClicksRow struct {
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+func (q *Queries) GetURLDailyClicks(ctx context.Context, shortCode string) ([]GetURLDailyClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLDailyClicks, shortCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLDailyClicksRow
+	for rows.Next() {
+		var i GetURLDailyClicksRow
+		if err := rows.Scan(&i.Date, &i.TotalClicks, &i.UniqueVisitors); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLDeviceClicks = `-- name: GetURLDeviceClicks :many
+SELECT device, total_clicks
+FROM analytics_url_device
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+`
+
+type GetURLDeviceClicksRow struct {
+	Device      string
+	TotalClicks int32
+}
+
+func (q *Queries) GetURLDeviceClicks(ctx context.Context, shortCode string) ([]GetURLDeviceClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLDeviceClicks, shortCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLDeviceClicksRow
+	for rows.Next() {
+		var i GetURLDeviceClicksRow
+		if err := rows.Scan(&i.Device, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLGeoClicks = `-- name: GetURLGeoClicks :many
+SELECT country, city, total_clicks
+FROM analytics_url_geo
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetURLGeoClicksRow struct {
+	Country     string
+	City        string
+	TotalClicks int32
+}
+
+func (q *Queries) GetURLGeoClicks(ctx context.Context, shortCode string) ([]GetURLGeoClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLGeoClicks, shortCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLGeoClicksRow
+	for rows.Next() {
+		var i GetURLGeoClicksRow
+		if err := rows.Scan(&i.Country, &i.City, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLReferrerClicks = `-- name: GetURLReferrerClicks :many
+SELECT referrer, total_clicks
+FROM analytics_url_referrer
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetURLReferrerClicksRow struct {
+	Referrer    string
+	TotalClicks int32
+}
+
+func (q *Queries) GetURLReferrerClicks(ctx context.Context, shortCode string) ([]GetURLReferrerClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getURLReferrerClicks, shortCode)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetURLReferrerClicksRow
+	for rows.Next() {
+		var i GetURLReferrerClicksRow
+		if err := rows.Scan(&i.Referrer, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getURLTotalClicks = `-- name: GetURLTotalClicks :one
+
+
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_url_daily
+WHERE short_code = $1
+`
+
+// SELECT queries for reading aggregate data
+// URL-level aggregate reads
+func (q *Queries) GetURLTotalClicks(ctx context.Context, shortCode string) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getURLTotalClicks, shortCode)
+	var total_clicks interface{}
+	err := row.Scan(&total_clicks)
+	return total_clicks, err
+}
+
+const getURLUniqueVisitors = `-- name: GetURLUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_url_daily
+WHERE short_code = $1
+`
+
+func (q *Queries) GetURLUniqueVisitors(ctx context.Context, shortCode string) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getURLUniqueVisitors, shortCode)
+	var unique_visitors interface{}
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
+}
+
+const getUserBrowserClicks = `-- name: GetUserBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_user_browser
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetUserBrowserClicksRow struct {
+	Browser     string
+	TotalClicks int32
+}
+
+func (q *Queries) GetUserBrowserClicks(ctx context.Context, userID uuid.UUID) ([]GetUserBrowserClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserBrowserClicks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserBrowserClicksRow
+	for rows.Next() {
+		var i GetUserBrowserClicksRow
+		if err := rows.Scan(&i.Browser, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserDailyClicks = `-- name: GetUserDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_user_daily
+WHERE user_id = $1
+ORDER BY date DESC
+LIMIT 30
+`
+
+type GetUserDailyClicksRow struct {
+	Date           time.Time
+	TotalClicks    int32
+	UniqueVisitors int32
+}
+
+func (q *Queries) GetUserDailyClicks(ctx context.Context, userID uuid.UUID) ([]GetUserDailyClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserDailyClicks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserDailyClicksRow
+	for rows.Next() {
+		var i GetUserDailyClicksRow
+		if err := rows.Scan(&i.Date, &i.TotalClicks, &i.UniqueVisitors); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserGeoClicks = `-- name: GetUserGeoClicks :many
+SELECT country, total_clicks
+FROM analytics_user_geo
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetUserGeoClicksRow struct {
+	Country     string
+	TotalClicks int32
+}
+
+func (q *Queries) GetUserGeoClicks(ctx context.Context, userID uuid.UUID) ([]GetUserGeoClicksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserGeoClicks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserGeoClicksRow
+	for rows.Next() {
+		var i GetUserGeoClicksRow
+		if err := rows.Scan(&i.Country, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserTopLinks = `-- name: GetUserTopLinks :many
+SELECT short_code, total_clicks
+FROM analytics_user_top_links
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10
+`
+
+type GetUserTopLinksRow struct {
+	ShortCode   string
+	TotalClicks int32
+}
+
+func (q *Queries) GetUserTopLinks(ctx context.Context, userID uuid.UUID) ([]GetUserTopLinksRow, error) {
+	rows, err := q.db.QueryContext(ctx, getUserTopLinks, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserTopLinksRow
+	for rows.Next() {
+		var i GetUserTopLinksRow
+		if err := rows.Scan(&i.ShortCode, &i.TotalClicks); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUserTotalClicks = `-- name: GetUserTotalClicks :one
+
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_user_daily
+WHERE user_id = $1
+`
+
+// User-level aggregate reads
+func (q *Queries) GetUserTotalClicks(ctx context.Context, userID uuid.UUID) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getUserTotalClicks, userID)
+	var total_clicks interface{}
+	err := row.Scan(&total_clicks)
+	return total_clicks, err
+}
+
+const getUserUniqueVisitors = `-- name: GetUserUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_user_daily
+WHERE user_id = $1
+`
+
+func (q *Queries) GetUserUniqueVisitors(ctx context.Context, userID uuid.UUID) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getUserUniqueVisitors, userID)
+	var unique_visitors interface{}
+	err := row.Scan(&unique_visitors)
+	return unique_visitors, err
 }
 
 const upsertAliasBrowser = `-- name: UpsertAliasBrowser :exec

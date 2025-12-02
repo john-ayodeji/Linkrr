@@ -125,3 +125,133 @@ WHERE a.short_code = $1
   AND a.clicked_at = $2
   AND a.ip = $3
 LIMIT 1;
+
+-- name: GetURLTotalClicks :one
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_url_daily
+WHERE short_code = $1;
+
+-- name: GetURLUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_url_daily
+WHERE short_code = $1;
+
+-- name: GetURLDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_url_daily
+WHERE short_code = $1
+ORDER BY date DESC
+LIMIT 30;
+
+-- name: GetURLGeoClicks :many
+SELECT country, city, total_clicks
+FROM analytics_url_geo
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetURLDeviceClicks :many
+SELECT device, total_clicks
+FROM analytics_url_device
+WHERE short_code = $1
+ORDER BY total_clicks DESC;
+
+-- name: GetURLBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_url_browser
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetURLReferrerClicks :many
+SELECT referrer, total_clicks
+FROM analytics_url_referrer
+WHERE short_code = $1
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- Alias-level aggregate reads
+
+-- name: GetAliasTotalClicks :one
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2;
+
+-- name: GetAliasUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2;
+
+-- name: GetAliasDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_alias_daily
+WHERE short_code = $1 AND alias = $2
+ORDER BY date DESC
+LIMIT 30;
+
+-- name: GetAliasGeoClicks :many
+SELECT country, city, total_clicks
+FROM analytics_alias_geo
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetAliasDeviceClicks :many
+SELECT device, total_clicks
+FROM analytics_alias_device
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC;
+
+-- name: GetAliasBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_alias_browser
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetAliasReferrerClicks :many
+SELECT referrer, total_clicks
+FROM analytics_alias_referrer
+WHERE short_code = $1 AND alias = $2
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- User-level aggregate reads
+
+-- name: GetUserTotalClicks :one
+SELECT COALESCE(SUM(total_clicks), 0) as total_clicks
+FROM analytics_user_daily
+WHERE user_id = $1;
+
+-- name: GetUserUniqueVisitors :one
+SELECT COALESCE(SUM(unique_visitors), 0) as unique_visitors
+FROM analytics_user_daily
+WHERE user_id = $1;
+
+-- name: GetUserDailyClicks :many
+SELECT date, total_clicks, unique_visitors
+FROM analytics_user_daily
+WHERE user_id = $1
+ORDER BY date DESC
+LIMIT 30;
+
+-- name: GetUserGeoClicks :many
+SELECT country, total_clicks
+FROM analytics_user_geo
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetUserBrowserClicks :many
+SELECT browser, total_clicks
+FROM analytics_user_browser
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10;
+
+-- name: GetUserTopLinks :many
+SELECT short_code, total_clicks
+FROM analytics_user_top_links
+WHERE user_id = $1
+ORDER BY total_clicks DESC
+LIMIT 10;

@@ -3,7 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/john-ayodeji/Linkrr/internal/handlers/auth"
+	analyticsHandler "github.com/john-ayodeji/Linkrr/internal/handlers/analyticsHandler"
+	authHandler "github.com/john-ayodeji/Linkrr/internal/handlers/auth"
 	"github.com/john-ayodeji/Linkrr/internal/handlers/redirectHandler"
 	"github.com/john-ayodeji/Linkrr/internal/handlers/shortenerHandler"
 	"github.com/john-ayodeji/Linkrr/internal/handlers/userHandler"
@@ -29,4 +30,10 @@ func RegisterRedirectRoute(mux *http.ServeMux) {
 
 func RegisterUserRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/v1/links/me", userHandler.GetMyLinks)
+}
+
+func RegisterAnalyticsRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /api/v1/analytics/{urlCode}", analyticsHandler.GetURLAnalytics)
+	mux.HandleFunc("GET /api/v1/analytics/{urlCode}/{alias}", analyticsHandler.GetAliasAnalytics)
+	mux.HandleFunc("GET /api/v1/analytics/global", analyticsHandler.GetGlobalAnalytics)
 }
