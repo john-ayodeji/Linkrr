@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 
 	"github.com/john-ayodeji/Linkrr/internal/config"
 	"github.com/john-ayodeji/Linkrr/internal/database"
@@ -40,8 +39,6 @@ func main() {
 		log.Fatal("JWT_SECRET not set in environment")
 	}
 
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-
 	IpstackApiKey := os.Getenv("IPSTACK_API_KEY")
 	IpStackURL := os.Getenv("IPSTACK_URL")
 
@@ -54,7 +51,7 @@ func main() {
 	}
 
 	cfg := &config.ApiConfig{
-		Port:          port,
+		Port:          3030,
 		JWTSecret:     jwtSecret,
 		Db:            database.New(db),
 		IpStackApiKey: IpstackApiKey,
