@@ -138,6 +138,7 @@ func GetAliasAnalytics(r *http.Request) (AliasAnalytics, error, int) {
 		ShortCode: shortCode,
 		Alias:     alias,
 	})
+
 	if err != nil {
 		return AliasAnalytics{}, fmt.Errorf("failed to get browser clicks"), http.StatusInternalServerError
 	}
