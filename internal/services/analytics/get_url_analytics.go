@@ -197,6 +197,7 @@ func aggregateToWeekly(dailyData []database.GetURLDailyClicksRow) []WeeklyClick 
 		year, week := dc.Date.ISOWeek()
 		weekStart := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
 		weekStart = weekStart.AddDate(0, 0, (week-1)*7)
+
 		for weekStart.Weekday() != time.Monday {
 			weekStart = weekStart.AddDate(0, 0, -1)
 		}
