@@ -81,7 +81,7 @@ func main() {
 	RegisterUserRoutes(mux)
 	RegisterAnalyticsRoutes(mux)
 
-	addr := fmt.Sprintf("localhost:%d", cfg.Port)
+	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
 	server := http.Server{Addr: addr, Handler: mux}
 	log.Printf("Server started on port %d", cfg.Port)
 	if err := http.ListenAndServe(server.Addr, server.Handler); err != nil {
