@@ -41,6 +41,9 @@ func main() {
 	}
 
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
+	if port == 0 {
+		port = 3030 // Default port
+	}
 
 	IpstackApiKey := os.Getenv("IPSTACK_API_KEY")
 	IpStackURL := os.Getenv("IPSTACK_URL")
@@ -78,16 +81,58 @@ func main() {
 
 	go analytics.AggregateAnalytics(analytics.AnalyticsEvent)
 
+	// Health check endpoint
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"ok"}`))
+	})
+
 	RegisterAuthRoutes(mux)
 	RegisterShortenerRoutes(mux)
 	RegisterRedirectRoute(mux)
 	RegisterUserRoutes(mux)
 	RegisterAnalyticsRoutes(mux)
 
+	// Add CORS and panic recovery middleware
+	handler := corsMiddleware(panicRecoveryMiddleware(mux))
+
 	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
-	server := http.Server{Addr: addr, Handler: mux}
+	server := http.Server{Addr: addr, Handler: handler}
 	log.Printf("Server started on port %d", cfg.Port)
 	if err := http.ListenAndServe(server.Addr, server.Handler); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
+}
+
+// Panic recovery middleware
+func panicRecoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("Panic recovered: %v", err)
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte(`{"error":"Internal server error"}`))
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
+
+// CORS middleware
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		
+		next.ServeHTTP(w, r)
+	})
 }
