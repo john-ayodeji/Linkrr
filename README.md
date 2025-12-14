@@ -59,26 +59,9 @@ Run the prebuilt image directly:
 
 ```bash
 docker pull ayodejijohndev/linkrr:0.1.3
-docker run --rm -p 8080:8080 --name linkrr ayodejijohndev/linkrr:0.1.3
 ```
 
 Adjust ports as needed for your environment and proxy setup.
-
-#### Enter container shell and prepare orchestration script
-After pulling the image, you can enter the running container shell, copy the example orchestrator script, and run it to start required services:
-
-```bash
-# Enter the container shell
-docker exec -it linkrr /bin/sh
-
-# Inside the container, go to /app and copy the example script
-cd /app
-cp linkrr.example.sh linkrr.sh
-
-# Edit linkrr.sh to set real secrets and credentials
-# Then run it to start Postgres, one Linkrr instance, and Caddy
-sh linkrr.sh
-```
 
 Notes:
 - The `linkrr.example.sh` script starts one Linkrr container for testing.
@@ -90,12 +73,15 @@ Key configuration files:
 - `Dockerfile`: Container build instructions.
 - `internal/config/apiConfig.go`: Application configuration (environment variables and defaults).
 
-Environment variables you may want to set (examples; confirm against your deployment needs):
+Environment variables used by the app (confirm for your deployment):
 - `PORT`: Server listen port (e.g., `8080`).
-- `DATABASE_URL`: Connection string for your database.
+- `DB_URL`: Postgres connection string (e.g., `postgres://user:pass@host:5432/db?sslmode=disable`).
 - `JWT_SECRET`: Secret for signing access tokens.
-- `REFRESH_TOKEN_SECRET`: Secret for refresh tokens.
-- `EMAIL_SMTP_HOST`, `EMAIL_SMTP_PORT`, `EMAIL_USERNAME`, `EMAIL_PASSWORD`: SMTP settings for outgoing emails.
+- `INSTANCE_ID`: Identifier for the app instance (used in logs).
+- `IPSTACK_API_KEY`: API key for IP geolocation.
+- `IPSTACK_URL`: Optional override for IPStack API base URL.
+- `MAILTRAP_TOKEN`: API token for Mailtrap (email delivery).
+- `PLATFORM`: `local`|`dev`|`docker`|`prod` to select email template paths.
 
 ## Running
 
@@ -138,6 +124,24 @@ Notes:
 - The example starts one app instance (`linkrr1`) for testing.
 - Caddy handles load balancing and can be configured to accept up to three instances (`linkrr1`–`linkrr3`). Edit your `Caddyfile` to add upstreams.
 - For production, run the script on your host with proper volumes, secrets management, monitoring, and backups.
+
+### Database Migrations
+Run SQL migrations inside one of the Linkrr server containers (not the DB or load balancer):
+
+```bash
+# Install goose (on host/WSL)
+go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Enter an app container shell (e.g., linkrr1)
+docker exec -it linkrr1 /bin/sh
+
+# Inside the container, run goose pointing at Postgres
+export DB_URL="postgres://postgres:YOUR_PASSWORD@my-postgres:5432/linkrr?sslmode=disable"
+cd /app/sql/schema
+goose postgres "$DB_URL" up
+```
+
+Use `goose postgres "$DB_URL" down` to roll back if needed.
 
 ## API Documentation
 See [API_README.md](API_README.md) for endpoint details, request/response formats, and examples.
