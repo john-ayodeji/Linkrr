@@ -16,6 +16,9 @@ func SendWelcomeEmail(name, email string) {
 		Name:     name,
 		LoginURL: "localhost:3000/api/v1/auth/login",
 	}
-	html := utils.RenderTemplate("internal/email_templates/signup_email.html", data)
+	html, err := utils.RenderTemplate(Path+"signup_email.html", data)
+	if err != nil {
+		return
+	}
 	sendEmail("Signup", subject, text, html, name, email)
 }

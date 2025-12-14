@@ -1,1 +1,11 @@
+# Ignore local orchestration scripts with secrets
+linkrr.sh
+
+# Node, Go, and common ignores (adjust as needed)
+node_modules/
+.DS_Store
+.env
+.env.*
+*.log
+coverage/
 .env

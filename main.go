@@ -40,6 +40,8 @@ func main() {
 		log.Fatal("JWT_SECRET not set in environment")
 	}
 
+	instanceId := os.Getenv("INSTANCE_ID")
+	loggedMux := logMiddleware(mux, instanceId)
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 
 	IpstackApiKey := os.Getenv("IPSTACK_API_KEY")
@@ -83,11 +85,23 @@ func main() {
 	RegisterRedirectRoute(mux)
 	RegisterUserRoutes(mux)
 	RegisterAnalyticsRoutes(mux)
+	RegisterHealthRoute(mux)
 
 	addr := fmt.Sprintf("0.0.0.0:%d", cfg.Port)
-	server := http.Server{Addr: addr, Handler: mux}
+	server := http.Server{Addr: addr, Handler: loggedMux}
 	log.Printf("Server started on port %d", cfg.Port)
 	if err := http.ListenAndServe(server.Addr, server.Handler); err != nil {
 		log.Fatalf("Server failed: %v", err)
 	}
+}
+
+func logMiddleware(next http.Handler, instanceID string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/health" {
+			next.ServeHTTP(w, r)
+		} else {
+			log.Printf("[%s] %s %s", instanceID, r.Method, r.URL.Path)
+			next.ServeHTTP(w, r)
+		}
+	})
 }

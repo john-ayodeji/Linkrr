@@ -5,11 +5,28 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 
 	"github.com/john-ayodeji/Linkrr/internal/utils"
 )
+
+func GetEmailTemplateFolder() string {
+	var platform = os.Getenv("PLATFORM")
+	if platform == "local" || platform == "dev" {
+		log.Println("internal/email_templates/")
+		return "internal/email_templates/"
+	}
+	if platform == "docker" || platform == "prod" {
+		return "/app/internal/email_templates/"
+	}
+
+	log.Println("internal/email_templates/")
+	return "internal/email_templates/"
+}
+
+var Path = GetEmailTemplateFolder()
 
 type mailtrapEmail struct {
 	Email string `json:"email"`

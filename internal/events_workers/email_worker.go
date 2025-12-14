@@ -1,6 +1,8 @@
 package events_workers
 
 import (
+	"log"
+
 	"github.com/john-ayodeji/Linkrr/internal/services/auth"
 	"github.com/john-ayodeji/Linkrr/internal/services/email"
 )
@@ -15,6 +17,7 @@ func LoginEmailWorker(userData <-chan authService.UserData) {
 	for data := range userData {
 		email.SendLoginWelcomeEmail(data.UserName, data.Email)
 	}
+	log.Printf("login channel closed")
 }
 
 func ForgotPasswordEmailWorker(emailData <-chan authService.ForgotPasswordEmailData) {

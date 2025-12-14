@@ -16,6 +16,9 @@ func SendPasswordResetEmail(name, email, url string) {
 		Name: name,
 		URL:  url,
 	}
-	html := utils.RenderTemplate("internal/email_templates/password_reset.html", data)
+	html, err := utils.RenderTemplate(Path+"password_reset.html", data)
+	if err != nil {
+		return
+	}
 	sendEmail("Password-Reset", subject, text, html, name, email)
 }
